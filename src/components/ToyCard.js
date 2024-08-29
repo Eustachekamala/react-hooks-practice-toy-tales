@@ -1,20 +1,31 @@
-import React,{ useState } from "react";
+import React from "react";
 
-function ToyCard( {toycard}) {
-  const [likes, setLikes] = useState(toycard.likes);
+function ToyCard( { toycard, onToyDeleted, onToyLiked } ) {
 
-  function handleLike(){
+  const handleDelete = () => {
     fetch(`http://localhost:3001/toys/${toycard.id}`, {
-      method:"POST",
-      headers:{
-        "Content-Type" : "application/json"
-      },
-      body:JSON.stringify({likes : likes + 1})
+      method: 'DELETE',
     })
-    .then(res => res.json())
-    .then(data => setLikes(data.likes))
-    .catch(error => console.error(error))
-  }
+      .then(() => {
+        onToyDeleted(toycard.id);
+      });
+  };
+
+  const handleLike = () => {
+    const updatedLikes = toycard.likes + 1;
+    
+    fetch(`http://localhost:3001/toys/${toycard.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ likes: updatedLikes }),
+    })
+      .then(response => response.json())
+      .then(updatedToy => {
+        onToyLiked(updatedToy);
+      });
+  };
 
   return (
     <div className="card" key={toycard.id}>
@@ -26,7 +37,7 @@ function ToyCard( {toycard}) {
       />
       <p>{toycard.likes} Likes </p>
       <button onClick={handleLike} className="like-btn">Like {"👍"}</button>
-      <button className="del-btn">Donate to GoodWill</button>
+      <button onClick={handleDelete} className="del-btn">Donate to GoodWill</button>
     </div>
   );
 }

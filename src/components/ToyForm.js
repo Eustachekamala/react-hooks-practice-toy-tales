@@ -1,17 +1,28 @@
 import React, { useState} from "react";
 
-function ToyForm() {
+function ToyForm( { onToyAdded } ) {
   const [toy, setToy] = useState([]);
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
   
-  const handleSubmit = e => {
+  function handleSubmit(e) {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const newToy = {
-      name: formData.get("name"),
-      image: formData.get("image"),
-    };
-    setToy(newToy);
-  };
+    const newToy = { name, image };
+
+    fetch('http://localhost:3001/toys', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newToy),
+    })
+      .then(response => response.json())
+      .then(data => {
+        onToyAdded(data);
+        setName("");
+        setImage("");
+      });
+  }
 
   const handleChange = e => {
     setToy({ ...toy, [e.target.name]: e.target.value });
